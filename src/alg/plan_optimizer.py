@@ -19,7 +19,7 @@ class PlanOptimizer:
     def select_mod(self, selected_mod_idx : int) -> bool:
         if self.is_full():
             return False
-        selected_mod = self.plan_optim_state.mod_pool.pop()
+        selected_mod = self.plan_optim_state.mod_pool.pop(selected_mod_idx)
         self.update_max_sim_so_far(selected_mod)
         self.plan_optim_state.selected_mods.append(selected_mod)
         return True
@@ -37,3 +37,6 @@ class PlanOptimizer:
 
     def is_full(self):
         return len(self.plan_optim_state.selected_mods) == self.selection_capacity
+    
+    def is_bucket_empty(self):
+        return len(self.plan_optim_state.mod_pool) == 0

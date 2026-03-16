@@ -5,5 +5,5 @@ def softmax(x: np.ndarray, temperature: int = 1.0):
     x = np.asarray(x, dtype=np.float64)
     x = x / temperature
     x_shifted = x - np.max(x)
-    x_exp = np.exp(x)
+    x_exp = np.exp(x_shifted)
     return x_exp / np.sum(x_exp)

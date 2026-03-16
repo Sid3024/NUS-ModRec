@@ -21,7 +21,7 @@ def greedy_basic_selection(
         plan_optim_state=plan_optim_state,
         my_config=my_config
     )
-    while not plan_optim.is_full():
+    while not plan_optim.is_full() and not plan_optim.is_bucket_empty():
         selected_mod_idx = select_mod(plan_optim=plan_optim)
         plan_optim.select_mod(selected_mod_idx)
     return plan_optim.plan_optim_state.selected_mods
@@ -36,21 +36,33 @@ def select_mod(plan_optim: PlanOptimizer) -> int:
             mod=mod,
             selection_sim_threshold=plan_optim.selection_ambiguity_threshold
         )
+        if len(mod.topics):
+            score /= len(mod.topics)
         mod_scores.append(score)
     mod_scores = np.array(mod_scores)
+    #print(f"{mod_scores=}")
     mod_scores_softmax = softmax(mod_scores, plan_optim.softmax_temperature)
+    #print(f"{mod_scores_softmax=}")
     max_score = np.max(mod_scores_softmax)
-    result = [
-        (i, max_score - score)
-        for i, v in enumerate(mod_scores_softmax)
-        if (max_score - score) < plan_optim.selection_sim_threshold
-    ]
-    if len(result) > 1 and plan_optim.ambiguity_agent_active:
-        idx = 1 #TODO
-        out = result[idx][0]
+    max_score_idx = np.argmax(mod_scores_softmax)
+    #print(f"{max_score=}")
+    print(f"{mod_scores.shape=}")
+    if plan_optim.ambiguity_agent_active:
+        result = [
+            (i, max_score - score)
+            for i, v in enumerate(mod_scores_softmax)
+            if (max_score - v) < plan_optim.selection_sim_threshold
+        ]
+        #print(f"{result=}")
+        assert(len(result) > 0), f"{len(result)=}"
+        if len(result)>1:
+            idx = 1 #TODO
+            out = result[idx][0]
+        else:
+            out=max_score_idx
     else:
-        out = result[0][0]
-    return out
+        out = max_score_idx
+    return max_score_idx
     
 
 

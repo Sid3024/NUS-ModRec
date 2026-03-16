@@ -15,7 +15,7 @@ class Skill:
 @dataclass
 class Job:
     title: str
-    job_weight: float = 0.0
+    weight: float = 0.0
     skills: list[Skill] = field(default_factory=list)
 
 @dataclass

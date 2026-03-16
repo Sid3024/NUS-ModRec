@@ -22,7 +22,7 @@ def Job_Mod_sim(job: Job, mod: Mod, selection_sim_threshold: float) -> float:
                 max_sim_so_far=skill.max_sim_score_so_far,
                 selection_sim_threshold=selection_sim_threshold
             )
-            score += diminished_gain * job.job_weight
+            score += diminished_gain * job.weight
     return score
 
 def topic_skill_sim(topic : Topic, skill : Skill) -> float:
