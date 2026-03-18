@@ -5,7 +5,8 @@ from src.calc.similarity import topic_skill_sim
 
 class PlanOptimizer:
     def __init__(
-            self, plan_optim_state: PlanOptimState, 
+            self, 
+            plan_optim_state: PlanOptimState, 
             my_config: MyConfig
         ):
         self.plan_optim_state = plan_optim_state
@@ -17,6 +18,18 @@ class PlanOptimizer:
 
 
     def select_mod(self, selected_mod_idx : int) -> bool:
+        """
+        Moves the selected mod from mod_pool to selected_mods in plan_optim_state.
+        Updates the max_sim_score_so_far for all jobs based on the selected mod.
+        Note: doesnt not decide which mod to select; the selected mod is passed into this function
+
+        Args:
+            selected_mod_idx (int): Index of the selected mod in mod_pool.
+
+        Returns:
+            boolean: True if successfully performed required operations, False otherwise (eg if full)
+        """
+
         if self.is_full():
             return False
         selected_mod = self.plan_optim_state.mod_pool.pop(selected_mod_idx)
@@ -25,7 +38,13 @@ class PlanOptimizer:
         return True
     
     def update_max_sim_so_far(self, mod: Mod):
-        for job in self.plan_optim_state.target_jobs:
+        """
+        Updates max_sim_score_so_far for all jobs based on the selected mod.
+
+        Args:
+            mod (Mod): Mod based on which to updates max_sim_score_so_far
+        """
+        for job in self.plan_optim_state.user_jobs:
             for skill in job.skills:
                 skill_mod_max_sim = 0.0
                 for topic in mod.topics:
