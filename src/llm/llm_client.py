@@ -9,4 +9,22 @@ def call_llm(messages: list[dict]) -> str:
         messages=messages,
         temperature=MyConfig.LLM_TEMPERATURE
     )
-    return response.choices[0].message.content
+    raw_out = response.choices[0].message.content
+    return clean_llm_response(raw_out)
+
+def clean_llm_response(response: str) -> str:
+    response = response.strip()
+
+    if response.startswith("```"):
+        lines = response.splitlines()
+
+        # remove first fence line
+        lines = lines[1:]
+
+        # remove last fence line if present
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+
+        response = "\n".join(lines).strip()
+
+    return response

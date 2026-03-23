@@ -9,15 +9,20 @@ class TextBlock:
 @dataclass
 class Skill:
     content: TextBlock
+    id: int = 0
     weight: float = 1.0
     max_sim_score_so_far: float = 0.0
 
 @dataclass
 class Job:
     title: str
+    id: int = 0
     type: str = ""
     weight: float = 0.0
     skills: list[Skill] = field(default_factory=list)
+
+    def __len__(self):
+        return len(self.skills)
 
     def to_prompt_str(self) -> str:
         skills_str = ", ".join(skill.content.text for skill in self.skills)  
@@ -30,6 +35,7 @@ class Job:
 @dataclass
 class Topic:
     content: TextBlock
+    id: int = 0
     weight: float = 1.0
     score: float = 0.0
 
@@ -37,16 +43,21 @@ class Topic:
 class Mod:
     title: str
     desc: TextBlock
+    id: int = 0
     topics: list[Topic] = field(default_factory=list)
 
     def __iter__(self):
         return iter(self.topics)
+    
+    def __len__(self):
+        return len(self.topics)
     
     def to_prompt_str(self) -> str:
         topics_str = ", ".join(topic.content.text for topic in self.topics)
 
         return (
             f"Module: {self.title}\n"
+            f"Description: {self.desc.text}\n"
             f"Topics: {topics_str}\n"
         )
 

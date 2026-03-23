@@ -4,10 +4,10 @@ import copy
 from src.config.config import MyConfig
 from src.types.domain import Mod, Student, ModType
 from src.types.optim import PlanOptimState
-from src.calc.similarity import Job_list_Mod_sim
+from src.calc.similarity import Job_list_Mod_sim, Job_list_Mod_sim_using_cache
 from src.calc.softmax import softmax
 from src.alg.plan_optimizer import PlanOptimizer
-from src.ambiguity_agent.ambiguity_decider import run_ambiguity_agent
+from src.ambiguity_agent.agent import run_ambiguity_agent
 
 def greedy_basic_selection(
         mod_pool: list[Mod],
@@ -57,12 +57,20 @@ def select_mod(student: Student, mod_type: ModType, plan_optim: PlanOptimizer, m
     """
     
     mod_scores = []
+    sim_cache = plan_optim.get_sim_cache()
     for mod in plan_optim.plan_optim_state.mod_pool:
-        score = Job_list_Mod_sim(
-            jobs=plan_optim.plan_optim_state.user_jobs, 
+        score = Job_list_Mod_sim_using_cache(
+            jobs=plan_optim.plan_optim_state.user_jobs,
             mod=mod,
-            selection_sim_threshold=plan_optim.selection_ambiguity_threshold
+            sim_cache=sim_cache,
+            selection_sim_threshold=plan_optim.selection_sim_threshold
         )
+        # score = Job_list_Mod_sim(
+        #     jobs=plan_optim.plan_optim_state.user_jobs, 
+        #     mod=mod,
+        #     selection_sim_threshold=plan_optim.selection_sim_threshold
+        # )
+        #score = plan_optim.get_mod_score(mod=mod)
         if len(mod.topics):
             score /= len(mod.topics)
         mod_scores.append(score)

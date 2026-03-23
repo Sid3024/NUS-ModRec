@@ -12,7 +12,7 @@ class MyConfig:
     softmax_temperature: float = 0.1
     selection_ambiguity_threshold: float = 0.10
     selection_sim_threshold: float = 0.60
-    ambiguity_agent_active: bool = True
+    ambiguity_agent_active: bool = False
     max_options_for_ambiguity_agent: int = 3
 
     target_job_weight: float = 1.0
@@ -21,6 +21,8 @@ class MyConfig:
 
     LLM_MODEL: str = "gpt-4o-mini"
     LLM_TEMPERATURE: float = 1.0
+
+    explanation_agent_reprompt_limit: int = 1
 
 
 my_config = MyConfig()

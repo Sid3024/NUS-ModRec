@@ -1,7 +1,9 @@
 from src.config.config import MyConfig
 from src.types.domain import Mod, Job
 from src.types.optim import PlanOptimState
-from src.calc.similarity import topic_skill_sim
+from src.calc.similarity import topic_skill_sim, Job_list_Mod_sim, build_job_mod_sim_matrix
+import numpy as np
+from numpy.typing import NDArray
 
 class PlanOptimizer:
     def __init__(
@@ -15,7 +17,52 @@ class PlanOptimizer:
         self.selection_sim_threshold = my_config.selection_sim_threshold
         self.selection_ambiguity_threshold = my_config.selection_ambiguity_threshold
         self.ambiguity_agent_active = my_config.ambiguity_agent_active
+        self.sim_cache = None
+        self.mod_id_sim_matrix_map = {}
+        self.mod_map_next_idx = 0
 
+        
+    # def get_mod_score(self, mod: Mod) -> float:
+    #     if self.sim_score_matrix is None:
+    #         self.build_sim_score_matrix()
+    #     idx = self.mod_id_sim_matrix_map[mod.id]
+    #     return self.sim_score_matrix[idx]
+
+    # def build_sim_score_matrix(self):
+    #     self.sim_score_matrix = []
+    #     for mod in self.plan_optim_state.mod_pool:
+    #         self.mod_id_sim_matrix_map[mod.id] = self.mod_map_next_idx
+    #         self.mod_map_next_idx += 1
+    #         self.sim_score_matrix.append(Job_list_Mod_sim(jobs=self.plan_optim_state.user_jobs, mod=mod, selection_sim_threshold=self.selection_sim_threshold))
+    
+    def get_sim_cache(self) -> list[list[NDArray[np.float64]]]:
+        if self.sim_cache is None:
+            self.build_sim_cache()
+        return self.sim_cache
+
+    def build_sim_cache(self):
+        self.serialize_user_jobs()
+        self.serialize_mod_pool()
+        self.sim_cache = [[0 for _ in range(len(self.plan_optim_state.user_jobs))] for _ in range(len(self.plan_optim_state.mod_pool))]
+        for mod in self.plan_optim_state.mod_pool:
+            for job in self.plan_optim_state.user_jobs:
+                self.sim_cache[mod.id][job.id] = build_job_mod_sim_matrix(job=job, mod=mod)
+
+    def serialize_user_jobs(self):
+        i = 0
+        for j, job in enumerate(self.plan_optim_state.user_jobs):
+            job.id = j
+            for skill in job.skills:
+                skill.id = i
+                i += 1
+
+    def serialize_mod_pool(self):
+        i = 0
+        for j, mod in enumerate(self.plan_optim_state.mod_pool):
+            mod.id = j
+            for topic in mod.topics:
+                topic.id = i
+                i += 1
 
     def select_mod(self, selected_mod_idx : int) -> bool:
         """
