@@ -9,14 +9,14 @@ class TextBlock:
 @dataclass
 class Skill:
     content: TextBlock
-    id: int = 0
+    id: int = -1
     weight: float = 1.0
     max_sim_score_so_far: float = 0.0
 
 @dataclass
 class Job:
     title: str
-    id: int = 0
+    id: int = -1
     type: str = ""
     weight: float = 0.0
     skills: list[Skill] = field(default_factory=list)
@@ -35,7 +35,7 @@ class Job:
 @dataclass
 class Topic:
     content: TextBlock
-    id: int = 0
+    id: int = -1
     weight: float = 1.0
     score: float = 0.0
 
@@ -43,7 +43,7 @@ class Topic:
 class Mod:
     title: str
     desc: TextBlock
-    id: int = 0
+    id: int = -1
     topics: list[Topic] = field(default_factory=list)
 
     def __iter__(self):
@@ -64,8 +64,9 @@ class Mod:
 @dataclass
 class Student:
     major: str    
-    desc: str
+    desc: str = ""
     my_jobs: list[Job] = field(default_factory=list)
+    my_selected_mods: list[Mod] = field(default_factory=list)
 
 @dataclass
 class ModType:

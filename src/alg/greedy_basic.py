@@ -11,6 +11,7 @@ from src.ambiguity_agent.agent import run_ambiguity_agent
 
 def greedy_basic_selection(
         mod_pool: list[Mod],
+        user_chosen_mods: list[Mod],
         student: Student,
         mod_type: ModType,
         my_config: MyConfig
@@ -31,7 +32,8 @@ def greedy_basic_selection(
 
     plan_optim_state = PlanOptimState(
         user_jobs=copy.deepcopy(student.my_jobs),
-        mod_pool=copy.deepcopy(mod_pool)
+        mod_pool=copy.deepcopy(mod_pool),
+        user_chosen_mods=copy.deepcopy(user_chosen_mods)
     )
     plan_optim = PlanOptimizer(
         plan_optim_state=plan_optim_state,
@@ -49,7 +51,9 @@ def select_mod(student: Student, mod_type: ModType, plan_optim: PlanOptimizer, m
     Selects a single mod given the mods that have already been chosen.
 
     Args:
-        plan_optim (PlanOptimizer): Allows function to keep track of chosen mods, and max_sim_score_so_far for each job skill (required for score calculation)
+        student (Student): Contains relevant student metadata (major and list of jobs) for optimisation algorithm.
+        plan_optim (PlanOptimizer): Allows function to keep track of chosen mods, and max_sim_score_so_far for each job skill (required for score calculation).
+        max_options_for_ambiguity_agent (int): Maximum number of mod options to include when querying ambiguity agent llm.
 
     Returns:
         int: index of mod chosen in the mod_pool list in PlanOptimizer

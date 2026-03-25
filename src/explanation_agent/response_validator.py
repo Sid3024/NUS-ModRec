@@ -8,6 +8,15 @@ def parse_response(response: str, selected_mods: list[Mod]) -> tuple[bool, list[
 def global_validator(response: str, selected_mods: list[Mod]) -> tuple[bool, str]:
     """
     Validates that response is a valid json and is a list with at least 1 valid dictionary of the expected format.
+
+    Args:
+        response (str): The llm response.
+        selected_mods (list[Mod]): list of mods selected by the alg the llm is generating explanations for.
+
+    Returns:
+        tuple:
+            is_valid (bool): True if no global error (ie valid json and json is a list), else False.
+            error_msg (str | None): Contains error message if is_valid is False, else is None.
     """
     try:
         json_resp = json.loads(response)
@@ -25,18 +34,18 @@ def global_validator(response: str, selected_mods: list[Mod]) -> tuple[bool, str
     
 def local_validator(response: str, selected_mods: list[Mod]) -> tuple[bool, list[dict], list[Mod], str]:
     """
-    Checks that the llm output dict for each mod is of the correct format, and returns the dicts that are and the titles that are not (for reprompting)
+    Returns list of dicts of mod + reasoning for selected mods with valid dicts in the llm response.
 
     Args:
         response (str): The llm response.
         selected_mods (list[Mod]): list of mods selected by the alg the llm is generating explanations for.
 
     Returns:
-        tuple[bool, list[dict], list[Mod], str]:
-            bool: True if no local error (ie all selected mods have their valid dict in returned list[dict]), else False
-            list[dict]: The list of valid dictionaries containing mod title and reasoning. 
-            list[Mod]: The list of mods for which valid dicts were not returned.
-            str: The error_msg, if no error then error_msg is None.
+        tuple:
+            is_valid (bool): True if no local error (i.e. all selected mods have valid dicts), else False.
+            valid_dicts (list[dict]): List of valid dictionaries containing mod title and reasoning.
+            invalid_mods (list[Mod]): Mods for which valid dicts were not returned.
+            error_msg (str | None): Error message if invalid, otherwise None.
 
     Notes:
         - Assumes input response str is of correct format (no global errors)

@@ -7,6 +7,13 @@ from src.config.config import my_config
 from copy import deepcopy
 
 def run_explanation_agent(student: Student, selected_mods: list[Mod]) -> tuple[bool, list[dict], str]:
+    """
+    Executes explanation agent, which generates a reasoning string for each mod selected by the algorithm via llm.
+
+    Args:
+        student (Student): Contains relevant student metadata, including major and their chosen jobs.
+        selected_mods (list[Mod]): List of the mods chosen by the optimisation algorithm.
+    """
     messages = construct_initial_prompt(student=student, selected_mods=selected_mods)
     print(f"{messages=}")
     llm_response = call_llm(messages=messages)
