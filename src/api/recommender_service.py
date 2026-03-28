@@ -8,7 +8,7 @@ from typing import Any
 
 from src.config.config import my_config
 from src.data_io.load import load_jobs, load_mods
-from src.data_io.create_student import construct_student
+from src.data_io.construct import construct_student
 from src.types.domain import ModType
 from src.alg.greedy_basic import greedy_basic_selection
 from src.explanation_agent.agent import run_explanation_agent
@@ -56,8 +56,8 @@ def generate_recommendations(
     )
 
     try:
-        jobs = load_jobs(my_config.JOBS_FILE_PATH)
-        mods = load_mods(my_config.MODS_FILE_PATH)
+        jobs = load_jobs(my_config.JOBS_FILE_PATH, major=user_major)
+        mods = load_mods(my_config.MODS_FILE_PATH, major=user_major)
 
         student = construct_student(
             user_major=user_major,
@@ -125,11 +125,12 @@ def generate_recommendations(
         log_recommendation_event(event)
 
         logger.info(
-            "generate_recommendations success | request_id=%s | num_mods=%s | latency_ms=%s | explanation_success=%s",
+            "generate_recommendations success | request_id=%s | num_mods=%s | latency_ms=%s | explanation_success=%s | selected_mods=%s",
             request_id,
             len(response_mods),
             latency_ms,
             success_received_all_reasoning,
+            [m["title"] for m in response_mods],
         )
 
         return response_mods

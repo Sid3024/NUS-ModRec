@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from src.api.schemas import RecommendRequest
-from src.data_access.repository import get_all_majors, get_jobs_for_major
-from src.services.recommender_service import generate_recommendations
+from src.api.repository import get_all_majors, get_jobs_for_major
+from src.api.recommender_service import generate_recommendations
 
 router = APIRouter()
 
@@ -28,8 +28,8 @@ def recommend_modules(request: RecommendRequest):
         raise HTTPException(status_code=400, detail="At least one job must be provided")
 
     modules = generate_recommendations(
-        major=request.major,
-        jobs=[job.model_dump() for job in request.jobs],
+        user_major=request.major.strip(),
+        user_jobs=[job.model_dump() for job in request.jobs],
     )
 
     return {"modules": modules}
