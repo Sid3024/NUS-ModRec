@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUS ModRec</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 2rem;
+        }
+
+        p.subtitle {
+            margin-top: 0;
+            color: #6b7280;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        select, button {
+            font: inherit;
+        }
+
+        .major-select,
+        .job-select,
+        .job-type-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 200px auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .row > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .muted {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #b91c1c;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        .success {
+            color: #065f46;
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 16px;
+        }
+
+        .module-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+            background: #fcfcfd;
+        }
+
+        .module-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        @media (max-width: 700px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <h1>NUS ModRec</h1>
+            <p class="subtitle">Choose your major, add your target jobs, and generate recommended modules.</p>
+
+            <div>
+                <label for="majorSelect">Select your major</label>
+                <select id="majorSelect" class="major-select">
+                    <option value="">Loading majors...</option>
+                </select>
+            </div>
+
+            <div id="jobsSection" class="hidden" style="margin-top: 24px;">
+                <h2 class="section-title">Jobs</h2>
+                <p class="muted">Add one or more jobs and assign each a type.</p>
+
+                <div id="jobRows"></div>
+
+                <div class="actions">
+                    <button id="addJobBtn" class="btn btn-secondary" type="button">Add Job</button>
+                    <button id="generateBtn" class="btn btn-primary" type="button" disabled>
+                        Generate Recommendation
+                    </button>
+                </div>
+            </div>
+
+            <div id="statusBox"></div>
+        </div>
+
+        <div id="resultsCard" class="card hidden">
+            <h2 class="section-title">Recommended Modules</h2>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Change this to your deployed/local FastAPI backend URL
+        const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+
+        const majorSelect = document.getElementById("majorSelect");
+        const jobsSection = document.getElementById("jobsSection");
+        const jobRows = document.getElementById("jobRows");
+        const addJobBtn = document.getElementById("addJobBtn");
+        const generateBtn = document.getElementById("generateBtn");
+        const statusBox = document.getElementById("statusBox");
+        const resultsCard = document.getElementById("resultsCard");
+        const resultsContainer = document.getElementById("resultsContainer");
+
+        let availableJobs = [];
+
+        function showStatus(message, type = "error") {
+            statusBox.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function clearStatus() {
+            statusBox.innerHTML = "";
+        }
+
+        function setLoading(message) {
+            statusBox.innerHTML = `<div class="loading">${message}</div>`;
+        }
+
+        function createJobRow(selectedJob = "", selectedType = "") {
+            const row = document.createElement("div");
+            row.className = "row job-row";
+
+            row.innerHTML = `
+                <div>
+                    <label>Job</label>
+                    <select class="job-select">
+                        <option value="">Select a job</option>
+                        ${availableJobs.map(job => `
+                            <option value="${escapeHtml(job)}" ${job === selectedJob ? "selected" : ""}>
+                                ${escapeHtml(job)}
+                            </option>
+                        `).join("")}
+                    </select>
+                </div>
+
+                <div>
+                    <label>Job type</label>
+                    <select class="job-type-select">
+                        <option value="">Select type</option>
+                        <option value="target" ${selectedType === "target" ? "selected" : ""}>target</option>
+                        <option value="dream" ${selectedType === "dream" ? "selected" : ""}>dream</option>
+                        <option value="backup" ${selectedType === "backup" ? "selected" : ""}>backup</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button class="btn btn-danger remove-job-btn" type="button">Remove</button>
+                </div>
+            `;
+
+            const jobSelect = row.querySelector(".job-select");
+            const jobTypeSelect = row.querySelector(".job-type-select");
+            const removeBtn = row.querySelector(".remove-job-btn");
+
+            jobSelect.addEventListener("change", validateForm);
+            jobTypeSelect.addEventListener("change", validateForm);
+
+            removeBtn.addEventListener("click", () => {
+                row.remove();
+                if (jobRows.children.length === 0) {
+                    addJobRow();
+                }
+                validateForm();
+            });
+
+            jobRows.appendChild(row);
+        }
+
+        function addJobRow() {
+            createJobRow();
+            validateForm();
+        }
+
+        function getSelectedJobsPayload() {
+            const rows = Array.from(document.querySelectorAll(".job-row"));
+
+            return rows
+                .map(row => {
+                    const title = row.querySelector(".job-select").value.trim();
+                    const type = row.querySelector(".job-type-select").value.trim();
+
+                    if (!title || !type) {
+                        return null;
+                    }
+
+                    return { title, type };
+                })
+                .filter(Boolean);
+        }
+
+        function validateForm() {
+            const major = majorSelect.value.trim();
+            const jobs = getSelectedJobsPayload();
+
+            generateBtn.disabled = !(major && jobs.length >= 1);
+        }
+
+        function renderResults(modules) {
+            resultsContainer.innerHTML = "";
+
+            if (!modules || modules.length === 0) {
+                resultsContainer.innerHTML = `<p class="muted">No modules were returned.</p>`;
+                resultsCard.classList.remove("hidden");
+                return;
+            }
+
+            modules.forEach(mod => {
+                const card = document.createElement("div");
+                card.className = "module-card";
+
+                card.innerHTML = `
+                    <h3>${escapeHtml(mod.title || "")}</h3>
+                    <p><strong>Description:</strong> ${escapeHtml(mod.desc || "")}</p>
+                    <p><strong>Why this was selected:</strong> ${escapeHtml(mod.reasoning || "")}</p>
+                `;
+
+                resultsContainer.appendChild(card);
+            });
+
+            resultsCard.classList.remove("hidden");
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        async function loadMajors() {
+            clearStatus();
+            majorSelect.innerHTML = `<option value="">Loading majors...</option>`;
+
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/majors`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch majors");
+                }
+
+                const data = await response.json();
+                const majors = data.majors || [];
+
+                majorSelect.innerHTML = `<option value="">Select a major</option>`;
+
+                majors.forEach(major => {
+                    const option = document.createElement("option");
+                    option.value = major;
+                    option.textContent = major;
+                    majorSelect.appendChild(option);
+                });
+            } catch (error) {
+                majorSelect.innerHTML = `<option value="">Unable to load majors</option>`;
+                showStatus(`Could not load majors: ${error.message}`);
+            }
+        }
+
+        async function loadJobsForMajor(major) {
+            jobsSection.classList.add("hidden");
+            resultsCard.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+            jobRows.innerHTML = "";
+            availableJobs = [];
+            validateForm();
+
+            if (!major) {
+                return;
+            }
+
+            setLoading("Loading jobs for selected major...");
+
+            try {
+                const response = await fetch(
+                    `${BACKEND_BASE_URL}/jobs?major=${encodeURIComponent(major)}`
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || "Failed to fetch jobs");
+                }
+
+                const data = await response.json();
+                availableJobs = data.jobs || [];
+
+                clearStatus();
+
+                if (availableJobs.length === 0) {
+                    showStatus("No jobs found for this major.");
+                    return;
+                }
+
+                jobsSection.classList.remove("hidden");
+                addJobRow();
+            } catch (error) {
+                showStatus(`Could not load jobs: ${error.message}`);
+            }
+        }
+
+        async function generateRecommendations() {
+            clearStatus();
+            resultsCard.classList.add("hidden");
+            resultsContainer.innerHTML = "";
+
+            const major = majorSelect.value.trim();
+            const jobs = getSelectedJobsPayload();
+
+            if (!major) {
+                showStatus("Please select a major.");
+                return;
+            }
+
+            if (jobs.length === 0) {
+                showStatus("Please add at least one job and job type.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            setLoading("Generating recommendations...");
+
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/recommend`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        major: major,
+                        jobs: jobs
+                    })
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Failed to generate recommendations");
+                }
+
+                clearStatus();
+                showStatus("Recommendations generated successfully.", "success");
+                renderResults(data.modules || []);
+            } catch (error) {
+                showStatus(`Could not generate recommendations: ${error.message}`);
+            } finally {
+                validateForm();
+            }
+        }
+
+        majorSelect.addEventListener("change", async (event) => {
+            const major = event.target.value;
+            await loadJobsForMajor(major);
+        });
+
+        addJobBtn.addEventListener("click", addJobRow);
+        generateBtn.addEventListener("click", generateRecommendations);
+
+        loadMajors();
+    </script>
+</body>
+</html>
