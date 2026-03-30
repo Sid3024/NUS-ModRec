@@ -31,7 +31,7 @@ app.include_router(router)
 # from src.data_io.load import load_jobs, load_mods
 # from src.alg.greedy_basic import greedy_basic_selection
 # from src.data_io.create_student import construct_student
-# from src.types.domain import ModType
+# from src.custom_types.domain import ModType
 # from src.explanation_agent.agent import run_explanation_agent
 # def main():
 #     user_jobs_tuple = [("Logistics Engineer", "backup"), ("Supply Chain Manager", "target")]

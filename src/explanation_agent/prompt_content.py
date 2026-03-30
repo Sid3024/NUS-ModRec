@@ -1,4 +1,4 @@
-from src.types.domain import Job, Mod, Student
+from src.custom_types.domain import Job, Mod, Student
 from src.explanation_agent.types import ValidMod
 def get_system_prompt() -> str:
     system_prompt = (

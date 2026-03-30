@@ -2,7 +2,7 @@
 from src.llm.llm_client import call_llm
 from src.explanation_agent.construct_prompt import construct_initial_prompt, construct_reprompt_global_reprompt, construct_reprompt_local_reprompt
 from src.explanation_agent.response_validator import global_validator, local_validator
-from src.types.domain import Student, Mod
+from src.custom_types.domain import Student, Mod
 from src.config.config import my_config
 from copy import deepcopy
 

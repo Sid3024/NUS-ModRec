@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
-from src.types.domain import TextBlock, Skill, Topic, Job, Mod
+from src.custom_types.domain import TextBlock, Skill, Topic, Job, Mod
 
 def Job_list_Mod_sim_using_cache(
     jobs: list[Job],

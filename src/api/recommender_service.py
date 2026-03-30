@@ -9,7 +9,7 @@ from typing import Any
 from src.config.config import my_config
 from src.data_io.load import load_jobs, load_mods
 from src.data_io.construct import construct_student
-from src.types.domain import ModType
+from src.custom_types.domain import ModType
 from src.alg.greedy_basic import greedy_basic_selection
 from src.explanation_agent.agent import run_explanation_agent
 from src.recommendation_audit import log_recommendation_event

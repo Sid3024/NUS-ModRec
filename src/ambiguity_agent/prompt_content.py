@@ -1,4 +1,4 @@
-from src.types.domain import Job, Mod, Student, ModType
+from src.custom_types.domain import Job, Mod, Student, ModType
 
 def system_prompt() -> str:
     """

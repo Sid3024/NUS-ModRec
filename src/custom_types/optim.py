@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 import numpy as np
-from src.types.domain import Job, Mod
+from src.custom_types.domain import Job, Mod
 
 @dataclass
 class PlanOptimState:

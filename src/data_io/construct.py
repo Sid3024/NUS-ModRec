@@ -1,7 +1,7 @@
 import copy
 from typing import Any
 
-from src.types.domain import Job, Student
+from src.custom_types.domain import Job, Student
 from src.config.config import MyConfig
 
 
