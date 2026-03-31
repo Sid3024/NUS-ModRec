@@ -1,4 +1,4 @@
-from src.custom_types.domain import Mod
+from src.types.domain import Mod
 from dataclasses import dataclass
 
 @dataclass

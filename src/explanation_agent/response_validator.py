@@ -1,5 +1,5 @@
 import json
-from src.custom_types.domain import Mod
+from src.types.domain import Mod
 def parse_response(response: str, selected_mods: list[Mod]) -> tuple[bool, list[Mod]]:
     pass
 

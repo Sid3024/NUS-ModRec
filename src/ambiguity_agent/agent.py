@@ -1,4 +1,4 @@
-from src.custom_types.domain import Job, Mod, Student, ModType
+from src.types.domain import Job, Mod, Student, ModType
 from src.ambiguity_agent.construct_prompt import construct_agent_initial_prompt_dict, construct_agent_reprompt_dict
 from src.ambiguity_agent.response_validator import validate_response
 from src.llm.llm_client import call_llm

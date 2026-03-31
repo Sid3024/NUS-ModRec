@@ -1,6 +1,6 @@
 from src.config.config import MyConfig
-from src.custom_types.domain import Mod, Job
-from src.custom_types.optim import PlanOptimState
+from src.types.domain import Mod, Job
+from src.types.optim import PlanOptimState
 from src.calc.similarity import topic_skill_sim, Job_list_Mod_sim, build_job_mod_sim_matrix
 import numpy as np
 from numpy.typing import NDArray

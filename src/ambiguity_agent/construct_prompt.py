@@ -1,4 +1,4 @@
-from src.custom_types.domain import Job, Mod, Student, ModType
+from src.types.domain import Job, Mod, Student, ModType
 from src.ambiguity_agent.prompt_content import system_prompt, user_prompt, user_reprompt
 
 def construct_agent_reprompt_dict(initial_prompt_messages: list[dict], llm_initial_response: str, error_msg: str, max_valid_index: int) -> list[dict]:

@@ -2,7 +2,7 @@ import numpy as np
 from pathlib import Path
 import json
 
-from src.custom_types.domain import Mod, Job, TextBlock, Skill, Topic
+from src.types.domain import Mod, Job, TextBlock, Skill, Topic
 
 
 def load_mods(MODS_JSON_PATH: Path, major: str) -> list[Mod]:

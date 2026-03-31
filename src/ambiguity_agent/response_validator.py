@@ -1,5 +1,5 @@
 import json
-from src.custom_types.domain import Mod
+from src.types.domain import Mod
 
 def validate_response(response: str, candidate_mods: list[Mod]) -> tuple[bool, str]:
     """

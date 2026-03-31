@@ -1,5 +1,5 @@
 from src.explanation_agent.prompt_content import get_system_prompt, get_user_prompt, get_user_reprompt_global_error, get_user_reprompt_local_error
-from src.custom_types.domain import Mod, Student
+from src.types.domain import Mod, Student
 from src.explanation_agent.response_validator import global_validator, local_validator
 
 

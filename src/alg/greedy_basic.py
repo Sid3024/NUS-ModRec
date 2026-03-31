@@ -2,8 +2,8 @@ import numpy as np
 import copy
 
 from src.config.config import MyConfig
-from src.custom_types.domain import Mod, Student, ModType
-from src.custom_types.optim import PlanOptimState
+from src.types.domain import Mod, Student, ModType
+from src.types.optim import PlanOptimState
 from src.calc.similarity import Job_list_Mod_sim, Job_list_Mod_sim_using_cache
 from src.calc.softmax import softmax
 from src.alg.plan_optimizer import PlanOptimizer
