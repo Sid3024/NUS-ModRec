@@ -88,7 +88,7 @@ def select_mod(student: Student, mod_type: ModType, plan_optim: PlanOptimizer, m
         all_results = [
             (i, max_score - v)
             for i, v in enumerate(mod_scores_softmax)
-            if (max_score - v) < plan_optim.selection_sim_threshold
+            if (max_score - v) < plan_optim.selection_ambiguity_threshold
         ]
         all_results.sort(key=lambda t: t[1])
         result = all_results[:max_options_for_ambiguity_agent]
